@@ -17,6 +17,7 @@
         --accent-contrast: #ffffff;
       }
       * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
       body {
         margin: 0;
         font-family: system-ui, sans-serif;
@@ -188,6 +189,19 @@
         color: #1e1c1a;
       }
       .photo-email-menu a:hover { background: #eee9e2; }
+      .draft-notice {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        background: #fff;
+      }
+      .draft-notice button { flex-shrink: 0; }
     </style>
   </head>
   <body>
@@ -197,6 +211,11 @@
         Completen esta información entre los dos. Al enviarla, comenzamos a
         construir su invitación digital.
       </p>
+
+      <div id="draft-notice" class="draft-notice" hidden>
+        <span>Recuperamos la información que habías guardado en este navegador.</span>
+        <button type="button" id="discard-draft-btn" class="add-btn">Empezar de nuevo</button>
+      </div>
 
       <form id="onboarding-form">
         <fieldset>
@@ -511,6 +530,9 @@
         }
       }
 
+      const DRAFT_KEY = 'onboarding-draft-v1';
+      let autosaveEnabled = false;
+
       const eventsContainer = document.getElementById('events-container');
       const eventTemplate = document.getElementById('event-template');
 
@@ -519,9 +541,16 @@
         const block = clone.querySelector('.event-block');
         if (defaults.name) block.querySelector('.ev-name').value = defaults.name;
         if (defaults.time) block.querySelector('.ev-time').value = defaults.time;
-        block.querySelector('.remove-event').addEventListener('click', () => block.remove());
+        if (defaults.location) block.querySelector('.ev-location').value = defaults.location;
+        if (defaults.address) block.querySelector('.ev-address').value = defaults.address;
+        if (defaults.mapEmbedUrl) block.querySelector('.ev-map').value = defaults.mapEmbedUrl;
+        block.querySelector('.remove-event').addEventListener('click', () => {
+          block.remove();
+          saveDraft();
+        });
         eventsContainer.appendChild(clone);
         makeAllClearable(block);
+        saveDraft();
       }
 
       document.getElementById('add-event').addEventListener('click', () => addEvent());
@@ -536,9 +565,13 @@
         const block = clone.querySelector('.event-block');
         if (defaults.label) block.querySelector('.registry-label').value = defaults.label;
         if (defaults.url) block.querySelector('.registry-url').value = defaults.url;
-        block.querySelector('.remove-event').addEventListener('click', () => block.remove());
+        block.querySelector('.remove-event').addEventListener('click', () => {
+          block.remove();
+          saveDraft();
+        });
         registriesContainer.appendChild(clone);
         makeAllClearable(block);
+        saveDraft();
       }
 
       document.getElementById('add-registry').addEventListener('click', () => addRegistry());
@@ -553,9 +586,13 @@
         if (defaults.time) block.querySelector('.it-time').value = defaults.time;
         if (defaults.title) block.querySelector('.it-title').value = defaults.title;
         if (defaults.icon) block.querySelector('.it-icon').value = defaults.icon;
-        block.querySelector('.remove-event').addEventListener('click', () => block.remove());
+        block.querySelector('.remove-event').addEventListener('click', () => {
+          block.remove();
+          saveDraft();
+        });
         itineraryContainer.appendChild(clone);
         makeAllClearable(block);
+        saveDraft();
       }
 
       function timeToMinutes(value) {
@@ -659,6 +696,136 @@
       [name1Input, name2Input].forEach((input) => input.addEventListener('input', updatePhotoEmailLinks));
       updatePhotoEmailLinks();
 
+      function collectRawEvents() {
+        return Array.from(document.querySelectorAll('#events-container .event-block')).map((block) => ({
+          name: block.querySelector('.ev-name').value,
+          time: block.querySelector('.ev-time').value,
+          location: block.querySelector('.ev-location').value,
+          address: block.querySelector('.ev-address').value,
+          mapEmbedUrl: block.querySelector('.ev-map').value,
+        }));
+      }
+
+      function collectRawItinerary() {
+        return Array.from(document.querySelectorAll('#itinerary-container .itinerary-block')).map((block) => ({
+          time: block.querySelector('.it-time').value,
+          title: block.querySelector('.it-title').value,
+          icon: block.querySelector('.it-icon').value,
+        }));
+      }
+
+      function collectRawRegistries() {
+        return Array.from(document.querySelectorAll('#registries-container .event-block')).map((block) => ({
+          label: block.querySelector('.registry-label').value,
+          url: block.querySelector('.registry-url').value,
+        }));
+      }
+
+      function buildDraft() {
+        const paletteChecked = document.querySelector('input[name="palette"]:checked');
+        return {
+          name1: name1Input.value,
+          name2: name2Input.value,
+          hashtag: hashtagInput.value,
+          hashtagAuto,
+          theme: themeSelect.value,
+          palette: paletteChecked ? paletteChecked.value : null,
+          customInk: customInk.value,
+          customPaper: customPaper.value,
+          customAccent: customAccent.value,
+          date: dateInput.value,
+          story: document.querySelector('textarea[name="story"]').value,
+          dressCode: document.querySelector('input[name="dressCode"]').value,
+          rsvpDeadline: document.querySelector('input[name="rsvpDeadline"]').value,
+          bankInfo: document.querySelector('textarea[name="bankInfo"]').value,
+          events: collectRawEvents(),
+          itinerary: collectRawItinerary(),
+          registries: collectRawRegistries(),
+        };
+      }
+
+      function saveDraft() {
+        if (!autosaveEnabled) return;
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(buildDraft()));
+      }
+
+      function clearDraft() {
+        localStorage.removeItem(DRAFT_KEY);
+      }
+
+      function refreshAllClearButtons() {
+        document.querySelectorAll('.clearable-wrap input, .clearable-wrap textarea').forEach(refreshClearButton);
+      }
+
+      function restoreDraft(draft) {
+        name1Input.value = draft.name1 || '';
+        name2Input.value = draft.name2 || '';
+        dateInput.value = draft.date || '';
+        document.querySelector('textarea[name="story"]').value = draft.story || '';
+        document.querySelector('input[name="dressCode"]').value = draft.dressCode || '';
+        document.querySelector('input[name="rsvpDeadline"]').value = draft.rsvpDeadline || '';
+        document.querySelector('textarea[name="bankInfo"]').value = draft.bankInfo || '';
+
+        if (draft.theme && THEME_PALETTES[draft.theme]) {
+          themeSelect.value = draft.theme;
+          renderPalettesForTheme(draft.theme);
+        }
+        if (draft.palette) {
+          const radio = document.querySelector(`input[name="palette"][value="${draft.palette}"]`);
+          if (radio) {
+            radio.checked = true;
+            if (draft.palette === 'custom') {
+              customColors.hidden = false;
+            } else {
+              lastPalette = currentPalettes.find((p) => p.key === draft.palette) || lastPalette;
+            }
+          }
+        }
+        if (draft.customInk) customInk.value = draft.customInk;
+        if (draft.customPaper) customPaper.value = draft.customPaper;
+        if (draft.customAccent) customAccent.value = draft.customAccent;
+        applyPreviewColors(getSelectedColors());
+
+        hashtagInput.value = draft.hashtag || '';
+        hashtagAuto = Boolean(draft.hashtagAuto);
+
+        eventsContainer.innerHTML = '';
+        (draft.events || []).forEach((ev) => addEvent(ev));
+
+        itineraryContainer.innerHTML = '';
+        (draft.itinerary || []).forEach((item) => addItineraryItem(item));
+
+        registriesContainer.innerHTML = '';
+        (draft.registries || []).forEach((r) => addRegistry(r));
+
+        updatePhotoEmailLinks();
+        refreshAllClearButtons();
+      }
+
+      const draftNotice = document.getElementById('draft-notice');
+      const discardDraftBtn = document.getElementById('discard-draft-btn');
+
+      const savedDraftRaw = localStorage.getItem(DRAFT_KEY);
+      if (savedDraftRaw) {
+        try {
+          restoreDraft(JSON.parse(savedDraftRaw));
+          draftNotice.hidden = false;
+        } catch (err) {
+          console.error('No se pudo restaurar el borrador guardado:', err);
+          clearDraft();
+        }
+      }
+
+      discardDraftBtn.addEventListener('click', () => {
+        clearDraft();
+        window.location.reload();
+      });
+
+      autosaveEnabled = true;
+      const onboardingForm = document.getElementById('onboarding-form');
+      onboardingForm.addEventListener('input', saveDraft);
+      onboardingForm.addEventListener('change', saveDraft);
+
       document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.target;
@@ -733,6 +900,7 @@
           const result = await response.json();
           if (!result.success) throw new Error(result.message || 'submit failed');
 
+          clearDraft();
           form.hidden = true;
           document.getElementById('thanks-message').textContent =
             `¡Gracias, ${name1} y ${name2}! Ya recibimos su información. No olviden mandarnos sus fotos por correo. Pronto nos pondremos en contacto.`;
