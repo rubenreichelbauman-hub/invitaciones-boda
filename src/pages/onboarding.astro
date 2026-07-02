@@ -302,49 +302,73 @@
     </template>
 
     <script>
-      const PALETTES = [
-        { key: 'elegante', label: 'Elegante clásico', ink: '#2B2320', paper: '#F1ECE4', accent: '#9C7A4A' },
-        { key: 'boho', label: 'Boho terracota', ink: '#3D2B1F', paper: '#F4E9DD', accent: '#C1694F' },
-        { key: 'botanico', label: 'Verde botánico', ink: '#1F2A1E', paper: '#F3F1E7', accent: '#6B8F71' },
-      ];
+      const THEME_PALETTES = {
+        elegante: [
+          { key: 'elegante-marfil', label: 'Marfil clásico', ink: '#2B2320', paper: '#F1ECE4', accent: '#9C7A4A' },
+          { key: 'elegante-marino', label: 'Azul marino y oro', ink: '#1E2A38', paper: '#F4F1EA', accent: '#B08D57' },
+          { key: 'elegante-vino', label: 'Vino tinto', ink: '#2E1A22', paper: '#F5EDE7', accent: '#7A2E3B' },
+        ],
+        bohemio: [
+          { key: 'boho-terracota', label: 'Terracota', ink: '#3D2B1F', paper: '#F4E9DD', accent: '#C1694F' },
+          { key: 'boho-oliva', label: 'Verde oliva', ink: '#33301F', paper: '#F6F1E4', accent: '#8A8B4F' },
+          { key: 'boho-rosa', label: 'Rosa palo', ink: '#3B2A2E', paper: '#F7EDE9', accent: '#C98A82' },
+        ],
+        minimalista: [
+          { key: 'min-gris', label: 'Gris piedra', ink: '#24272B', paper: '#F5F5F3', accent: '#9AA5B1' },
+          { key: 'min-sage', label: 'Verde sage', ink: '#222420', paper: '#F6F5F1', accent: '#A7B49E' },
+          { key: 'min-mono', label: 'Blanco y negro', ink: '#111111', paper: '#FAFAFA', accent: '#C9A876' },
+        ],
+      };
 
+      const themeSelect = document.querySelector('select[name="theme"]');
       const paletteOptions = document.getElementById('palette-options');
       const customColors = document.getElementById('custom-colors');
       const customInk = document.getElementById('custom-ink');
       const customPaper = document.getElementById('custom-paper');
       const customAccent = document.getElementById('custom-accent');
 
-      PALETTES.forEach((palette, index) => {
-        const label = document.createElement('label');
-        label.className = 'palette-option';
-        label.innerHTML = `
-          <input type="radio" name="palette" value="${palette.key}" ${index === 0 ? 'checked' : ''} />
+      let currentPalettes = THEME_PALETTES[themeSelect.value];
+      let lastPalette = currentPalettes[0];
+
+      function renderPalettesForTheme(themeKey) {
+        currentPalettes = THEME_PALETTES[themeKey];
+        lastPalette = currentPalettes[0];
+        customColors.hidden = true;
+        paletteOptions.innerHTML = '';
+
+        currentPalettes.forEach((palette, index) => {
+          const label = document.createElement('label');
+          label.className = 'palette-option';
+          label.innerHTML = `
+            <input type="radio" name="palette" value="${palette.key}" ${index === 0 ? 'checked' : ''} />
+            <span class="palette-card">
+              <span class="swatch-group">
+                <span class="swatch" style="background:${palette.ink}"></span>
+                <span class="swatch" style="background:${palette.paper}"></span>
+                <span class="swatch" style="background:${palette.accent}"></span>
+              </span>
+              <span class="palette-label">${palette.label}</span>
+            </span>
+          `;
+          paletteOptions.appendChild(label);
+        });
+
+        const customLabel = document.createElement('label');
+        customLabel.className = 'palette-option';
+        customLabel.innerHTML = `
+          <input type="radio" name="palette" value="custom" />
           <span class="palette-card">
             <span class="swatch-group">
-              <span class="swatch" style="background:${palette.ink}"></span>
-              <span class="swatch" style="background:${palette.paper}"></span>
-              <span class="swatch" style="background:${palette.accent}"></span>
+              <span class="swatch" style="background:#fff;border-style:dashed;"></span>
             </span>
-            <span class="palette-label">${palette.label}</span>
+            <span class="palette-label">Personalizar</span>
           </span>
         `;
-        paletteOptions.appendChild(label);
-      });
+        paletteOptions.appendChild(customLabel);
+      }
 
-      const customLabel = document.createElement('label');
-      customLabel.className = 'palette-option';
-      customLabel.innerHTML = `
-        <input type="radio" name="palette" value="custom" />
-        <span class="palette-card">
-          <span class="swatch-group">
-            <span class="swatch" style="background:#fff;border-style:dashed;"></span>
-          </span>
-          <span class="palette-label">Personalizar</span>
-        </span>
-      `;
-      paletteOptions.appendChild(customLabel);
-
-      let lastPalette = PALETTES[0];
+      themeSelect.addEventListener('change', () => renderPalettesForTheme(themeSelect.value));
+      renderPalettesForTheme(themeSelect.value);
 
       paletteOptions.addEventListener('change', (e) => {
         const value = e.target.value;
@@ -355,7 +379,7 @@
           customAccent.value = lastPalette.accent;
         } else {
           customColors.hidden = true;
-          lastPalette = PALETTES.find((p) => p.key === value);
+          lastPalette = currentPalettes.find((p) => p.key === value);
         }
       });
 
@@ -364,7 +388,7 @@
         if (selected === 'custom') {
           return { ink: customInk.value, paper: customPaper.value, accent: customAccent.value };
         }
-        const palette = PALETTES.find((p) => p.key === selected);
+        const palette = currentPalettes.find((p) => p.key === selected);
         return { ink: palette.ink, paper: palette.paper, accent: palette.accent };
       }
 
