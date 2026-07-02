@@ -1,0 +1,290 @@
+---
+// src/pages/onboarding.astro
+// Herramienta interna: genera un config.json listo para pegar en src/data/config.json
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de config.json — Nueva boda</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #f6f5f3;
+        color: #1e1c1a;
+        padding: 2.5rem 1.5rem 6rem;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; }
+      h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+      .subtitle { opacity: 0.7; font-size: 0.9rem; margin-bottom: 2.5rem; }
+      fieldset {
+        border: 1px solid #ddd8d1;
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem 1.5rem;
+        margin-bottom: 1.75rem;
+        background: #fff;
+      }
+      legend {
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0 0.4rem;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+      }
+      label span { display: block; margin-bottom: 0.3rem; opacity: 0.75; }
+      input, textarea, select {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.55rem 0.7rem;
+        border: 1px solid #ccc4ba;
+        border-radius: 6px;
+        font-family: inherit;
+      }
+      textarea { resize: vertical; }
+      .row { display: flex; gap: 1rem; }
+      .row > label { flex: 1; }
+      .color-row input[type="color"] { height: 2.3rem; padding: 0.2rem; }
+      .event-block {
+        border: 1px dashed #ccc4ba;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+      }
+      .remove-event {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        opacity: 0.5;
+        font-size: 0.9rem;
+      }
+      .remove-event:hover { opacity: 1; }
+      .add-btn, .generate-btn, .copy-btn, .download-btn {
+        font-size: 0.85rem;
+        border: 1px solid #1e1c1a;
+        background: #1e1c1a;
+        color: #fff;
+        border-radius: 6px;
+        padding: 0.6rem 1.1rem;
+        cursor: pointer;
+      }
+      .add-btn {
+        background: none;
+        color: #1e1c1a;
+      }
+      .add-btn:hover { background: #eee9e2; }
+      .generate-btn { display: block; width: 100%; padding: 0.9rem; font-size: 0.95rem; margin-top: 0.5rem; }
+      #output-section { margin-top: 2.5rem; }
+      #json-output {
+        width: 100%;
+        min-height: 320px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.8rem;
+        white-space: pre;
+      }
+      .output-actions { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+      .hint { font-size: 0.8rem; opacity: 0.65; margin-top: 1.5rem; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Generador de config.json</h1>
+      <p class="subtitle">
+        Llena los datos de la nueva boda y al final genera el archivo listo para
+        reemplazar <code>src/data/config.json</code>.
+      </p>
+
+      <form id="onboarding-form">
+        <fieldset>
+          <legend>La pareja</legend>
+          <div class="row">
+            <label><span>Nombre 1</span><input type="text" name="name1" required /></label>
+            <label><span>Nombre 2</span><input type="text" name="name2" required /></label>
+          </div>
+          <label><span>Hashtag</span><input type="text" name="hashtag" placeholder="#AnaYCarlos2026" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tema y colores</legend>
+          <label><span>Tema</span><input type="text" name="theme" value="elegante" /></label>
+          <div class="row color-row">
+            <label><span>Color tinta (texto)</span><input type="color" name="ink" value="#2B2320" /></label>
+            <label><span>Color papel (fondo)</span><input type="color" name="paper" value="#F1ECE4" /></label>
+            <label><span>Color acento</span><input type="color" name="accent" value="#9C7A4A" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Fecha y contenido</legend>
+          <label><span>Fecha y hora de la boda</span><input type="datetime-local" name="date" required /></label>
+          <label>
+            <span>Ruta de la foto principal (hero)</span>
+            <input type="text" name="heroImage" placeholder="/images/nombre-pareja/1.jpg" />
+          </label>
+          <label><span>Nuestra historia</span><textarea name="story" rows="3"></textarea></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Eventos</legend>
+          <div id="events-container"></div>
+          <button type="button" id="add-event" class="add-btn">+ Agregar evento</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>Detalles</legend>
+          <label><span>Código de vestimenta</span><input type="text" name="dressCode" placeholder="Formal · tonos tierra" /></label>
+          <label><span>Fecha límite para RSVP</span><input type="date" name="rsvpDeadline" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Galería</legend>
+          <label>
+            <span>Rutas de fotos (una por línea)</span>
+            <textarea name="gallery" rows="4" placeholder="/images/nombre-pareja/1.jpg&#10;/images/nombre-pareja/2.jpg"></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Mesa de regalos</legend>
+          <label><span>URL de mesa de regalos</span><input type="text" name="registryUrl" placeholder="https://..." /></label>
+          <label><span>Datos bancarios</span><textarea name="bankInfo" rows="3" placeholder="Banco: ...&#10;Cuenta: ...&#10;A nombre de: ..."></textarea></label>
+        </fieldset>
+
+        <button type="submit" class="generate-btn">Generar config.json</button>
+      </form>
+
+      <div id="output-section" hidden>
+        <fieldset>
+          <legend>Resultado</legend>
+          <textarea id="json-output" readonly></textarea>
+          <div class="output-actions">
+            <button type="button" id="copy-btn" class="copy-btn">Copiar</button>
+            <button type="button" id="download-btn" class="download-btn">Descargar config.json</button>
+          </div>
+        </fieldset>
+        <p class="hint">
+          Guarda este archivo como <code>src/data/config.json</code> (reemplazando el actual)
+          y sube las fotos correspondientes a <code>public/images/</code>.
+        </p>
+      </div>
+    </div>
+
+    <template id="event-template">
+      <div class="event-block">
+        <button type="button" class="remove-event" aria-label="Quitar evento">&times;</button>
+        <label><span>Nombre del evento</span><input type="text" class="ev-name" placeholder="Ceremonia" /></label>
+        <div class="row">
+          <label><span>Hora</span><input type="text" class="ev-time" placeholder="17:00" /></label>
+          <label><span>Lugar</span><input type="text" class="ev-location" placeholder="Iglesia San José" /></label>
+        </div>
+        <label><span>Dirección completa</span><input type="text" class="ev-address" /></label>
+        <label>
+          <span>URL de embed de Google Maps (opcional)</span>
+          <input type="text" class="ev-map" placeholder="https://www.google.com/maps/embed?pb=..." />
+          <small style="display:block;opacity:0.6;margin-top:0.3rem;">
+            Debe ser el link de "Insertar un mapa" (botón Compartir → pestaña Insertar un mapa → Copiar HTML,
+            usa solo la URL del src). El link normal para compartir (maps.app.goo.gl/...) no funciona aquí.
+          </small>
+        </label>
+      </div>
+    </template>
+
+    <script>
+      const eventsContainer = document.getElementById('events-container');
+      const eventTemplate = document.getElementById('event-template');
+
+      function addEvent(defaults = {}) {
+        const clone = eventTemplate.content.cloneNode(true);
+        const block = clone.querySelector('.event-block');
+        if (defaults.name) block.querySelector('.ev-name').value = defaults.name;
+        if (defaults.time) block.querySelector('.ev-time').value = defaults.time;
+        block.querySelector('.remove-event').addEventListener('click', () => block.remove());
+        eventsContainer.appendChild(clone);
+      }
+
+      document.getElementById('add-event').addEventListener('click', () => addEvent());
+      addEvent({ name: 'Ceremonia' });
+      addEvent({ name: 'Recepción' });
+
+      document.getElementById('onboarding-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const fd = new FormData(form);
+
+        const events = Array.from(document.querySelectorAll('.event-block'))
+          .map((block) => ({
+            name: block.querySelector('.ev-name').value.trim(),
+            time: block.querySelector('.ev-time').value.trim(),
+            location: block.querySelector('.ev-location').value.trim(),
+            address: block.querySelector('.ev-address').value.trim(),
+            mapEmbedUrl: block.querySelector('.ev-map').value.trim(),
+          }))
+          .filter((ev) => ev.name || ev.location);
+
+        const gallery = fd.get('gallery')
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        const config = {
+          couple: {
+            names: [fd.get('name1').trim(), fd.get('name2').trim()],
+            hashtag: fd.get('hashtag').trim(),
+          },
+          theme: fd.get('theme').trim(),
+          colors: {
+            ink: fd.get('ink'),
+            paper: fd.get('paper'),
+            accent: fd.get('accent'),
+          },
+          date: fd.get('date'),
+          heroImage: fd.get('heroImage').trim(),
+          story: fd.get('story').trim(),
+          events,
+          dressCode: fd.get('dressCode').trim(),
+          rsvpDeadline: fd.get('rsvpDeadline'),
+          gallery,
+          giftOptions: {
+            registryUrl: fd.get('registryUrl').trim(),
+            bankInfo: fd.get('bankInfo').trim(),
+          },
+        };
+
+        const json = JSON.stringify(config, null, 2);
+        document.getElementById('json-output').value = json;
+        document.getElementById('output-section').hidden = false;
+        document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' });
+      });
+
+      document.getElementById('copy-btn').addEventListener('click', async () => {
+        const output = document.getElementById('json-output');
+        await navigator.clipboard.writeText(output.value);
+        const btn = document.getElementById('copy-btn');
+        const original = btn.textContent;
+        btn.textContent = 'Copiado ✓';
+        setTimeout(() => { btn.textContent = original; }, 1800);
+      });
+
+      document.getElementById('download-btn').addEventListener('click', () => {
+        const json = document.getElementById('json-output').value;
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'config.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    </script>
+  </body>
+</html>

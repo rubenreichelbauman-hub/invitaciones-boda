@@ -11,6 +11,10 @@ interface Props {
   events: EventInfo[];
 }
 const { events } = Astro.props;
+
+// Solo un link de "insertar mapa" (google.com/maps/embed?...) funciona dentro de un iframe;
+// los links para compartir (maps.app.goo.gl/...) son bloqueados por Google y salen en blanco.
+const isEmbeddable = (url?: string) => !!url && url.includes('maps/embed');
 ---
 
 <section class="location-section">
@@ -23,7 +27,7 @@ const { events } = Astro.props;
         <p class="location-place">{event.location}</p>
         {event.address && <p class="location-address">{event.address}</p>}
 
-        {event.mapEmbedUrl && (
+        {isEmbeddable(event.mapEmbedUrl) && (
           <div class="map-wrapper">
             <iframe
               src={event.mapEmbedUrl}
