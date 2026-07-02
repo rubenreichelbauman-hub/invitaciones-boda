@@ -1,0 +1,36 @@
+---
+// src/components/OurStory.astro
+interface Props {
+  story: string;
+}
+const { story } = Astro.props;
+---
+
+<section class="story-section">
+  <p class="section-eyebrow">Nuestra historia</p>
+  <p class="story-text">{story}</p>
+</section>
+
+<style>
+  .story-section {
+    padding: 6rem 1.5rem;
+    background: var(--paper, #F1ECE4);
+    color: var(--ink, #2B2320);
+    text-align: center;
+  }
+  .section-eyebrow {
+    font-family: var(--font-utility, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-bottom: 1.5rem;
+  }
+  .story-text {
+    font-family: var(--font-heading, serif);
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+</style>
