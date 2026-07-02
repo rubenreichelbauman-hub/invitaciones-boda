@@ -210,9 +210,21 @@
         <button type="button" class="remove-event" aria-label="Quitar momento">&times;</button>
         <div class="row">
           <label><span>Hora</span><input type="text" class="it-time" placeholder="20:00" /></label>
-          <label><span>Momento</span><input type="text" class="it-title" placeholder="Cena" /></label>
+          <label>
+            <span>Icono</span>
+            <select class="it-icon">
+              <option value="church">⛪ Ceremonia</option>
+              <option value="camera">📷 Fotos</option>
+              <option value="toast">🥂 Cóctel / brindis</option>
+              <option value="dinner">🍽️ Cena</option>
+              <option value="rings">💍 Baile / anillos</option>
+              <option value="cake">🎂 Pastel</option>
+              <option value="party">🎉 Fiesta</option>
+              <option value="heart">❤️ Cierre</option>
+            </select>
+          </label>
         </div>
-        <label><span>Descripción (opcional)</span><input type="text" class="it-description" /></label>
+        <label><span>Descripción del momento</span><input type="text" class="it-title" placeholder="Inicia la ceremonia civil" /></label>
       </div>
     </template>
 
@@ -241,14 +253,15 @@
         const block = clone.querySelector('.itinerary-block');
         if (defaults.time) block.querySelector('.it-time').value = defaults.time;
         if (defaults.title) block.querySelector('.it-title').value = defaults.title;
+        if (defaults.icon) block.querySelector('.it-icon').value = defaults.icon;
         block.querySelector('.remove-event').addEventListener('click', () => block.remove());
         itineraryContainer.appendChild(clone);
       }
 
       document.getElementById('add-itinerary-item').addEventListener('click', () => addItineraryItem());
-      addItineraryItem({ time: '17:00', title: 'Ceremonia' });
-      addItineraryItem({ time: '20:00', title: 'Cena' });
-      addItineraryItem({ time: '21:30', title: 'Baile' });
+      addItineraryItem({ time: '17:00', title: 'Inicia la ceremonia civil', icon: 'church' });
+      addItineraryItem({ time: '20:00', title: 'Cena y banquete', icon: 'dinner' });
+      addItineraryItem({ time: '21:30', title: 'Primer baile de los novios', icon: 'rings' });
 
       document.getElementById('onboarding-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -269,7 +282,7 @@
           .map((block) => ({
             time: block.querySelector('.it-time').value.trim(),
             title: block.querySelector('.it-title').value.trim(),
-            description: block.querySelector('.it-description').value.trim(),
+            icon: block.querySelector('.it-icon').value,
           }))
           .filter((item) => item.time || item.title);
 

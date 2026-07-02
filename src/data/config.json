@@ -29,11 +29,12 @@
     }
   ],
   "itinerary": [
-    { "time": "17:00", "title": "Ceremonia" },
-    { "time": "18:30", "title": "Cóctel de bienvenida" },
-    { "time": "20:00", "title": "Cena" },
-    { "time": "21:30", "title": "Baile" },
-    { "time": "01:00", "title": "Última llamada" }
+    { "time": "17:00", "title": "Inicia la ceremonia civil", "icon": "church" },
+    { "time": "18:30", "title": "Cóctel de bienvenida", "icon": "toast" },
+    { "time": "20:00", "title": "Cena y banquete", "icon": "dinner" },
+    { "time": "21:30", "title": "Primer baile de los novios", "icon": "rings" },
+    { "time": "22:00", "title": "Inicia la fiesta, música y diversión", "icon": "party" },
+    { "time": "01:00", "title": "Termina la celebración de la boda", "icon": "heart" }
   ],
   "dressCode": "Formal · tonos tierra",
   "rsvpDeadline": "2026-10-01",
