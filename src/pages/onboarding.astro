@@ -442,7 +442,9 @@
             `¡Gracias, ${name1} y ${name2}! Ya recibimos su información y sus fotos. Pronto nos pondremos en contacto.`;
           document.getElementById('thanks-section').hidden = false;
           document.getElementById('thanks-section').scrollIntoView({ behavior: 'smooth' });
-        } catch {
+        } catch (err) {
+          console.error('Web3Forms submit error:', err);
+          errorText.textContent = `No pudimos enviar la información: ${err.message}`;
           errorText.hidden = false;
           submitBtn.disabled = false;
           submitBtn.textContent = 'Enviar y construir mi invitación';
