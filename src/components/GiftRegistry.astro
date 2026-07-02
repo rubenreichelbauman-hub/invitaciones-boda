@@ -1,13 +1,17 @@
 ---
 // src/components/GiftRegistry.astro
+interface Registry {
+  label: string;
+  url: string;
+}
 interface Props {
-  registryUrl?: string;
+  registries?: Registry[];
   bankInfo?: string; // texto libre: banco, cuenta, referencia
 }
-const { registryUrl, bankInfo } = Astro.props;
+const { registries = [], bankInfo } = Astro.props;
 ---
 
-{(registryUrl || bankInfo) && (
+{(registries.length > 0 || bankInfo) && (
   <section class="gift-section">
     <p class="section-eyebrow">Mesa de regalos</p>
     <p class="gift-intro">
@@ -16,12 +20,12 @@ const { registryUrl, bankInfo } = Astro.props;
     </p>
 
     <div class="gift-options">
-      {registryUrl && (
-        <a class="gift-card" href={registryUrl} target="_blank" rel="noopener noreferrer">
-          <span class="gift-card-label">Mesa de regalos online</span>
+      {registries.map((registry) => (
+        <a class="gift-card" href={registry.url} target="_blank" rel="noopener noreferrer">
+          <span class="gift-card-label">{registry.label}</span>
           <span class="gift-card-action">Ver mesa →</span>
         </a>
-      )}
+      ))}
 
       {bankInfo && (
         <div class="gift-card">

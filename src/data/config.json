@@ -44,7 +44,10 @@
     "/images/ana-carlos/3.jpg"
   ],
   "giftOptions": {
-    "registryUrl": "https://www.mesaderegalos.com/ana-carlos",
+    "registries": [
+      { "label": "Liverpool", "url": "https://www.liverpool.com.mx/mesa-de-regalos/ana-carlos" },
+      { "label": "Amazon", "url": "https://www.amazon.com.mx/wedding/registry/ana-carlos" }
+    ],
     "bankInfo": "Banco: BBVA\nCuenta: 0123456789\nA nombre de: Ana Pérez"
   }
 }

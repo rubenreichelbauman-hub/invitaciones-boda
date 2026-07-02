@@ -273,8 +273,13 @@
 
         <fieldset>
           <legend>Mesa de regalos</legend>
-          <label><span>URL de mesa de regalos</span><input type="text" name="registryUrl" placeholder="https://..." /></label>
-          <label><span>Datos bancarios</span><textarea name="bankInfo" rows="3" placeholder="Banco: ...&#10;Cuenta: ...&#10;A nombre de: ..."></textarea></label>
+          <p class="field-hint">
+            Si tienen mesa en más de un lugar (tienda departamental, en línea, etc.),
+            agrega todas las que necesites.
+          </p>
+          <div id="registries-container"></div>
+          <button type="button" id="add-registry" class="add-btn">+ Agregar mesa de regalos</button>
+          <label style="margin-top: 1.25rem;"><span>Datos bancarios</span><textarea name="bankInfo" rows="3" placeholder="Banco: ...&#10;Cuenta: ...&#10;A nombre de: ..."></textarea></label>
         </fieldset>
 
         <button type="submit" id="submit-btn" class="generate-btn">Enviar y construir mi invitación</button>
@@ -290,6 +295,14 @@
         </fieldset>
       </div>
     </div>
+
+    <template id="registry-template">
+      <div class="event-block">
+        <button type="button" class="remove-event" aria-label="Quitar mesa de regalos">&times;</button>
+        <label><span>Nombre de la tienda</span><input type="text" class="registry-label" placeholder="Liverpool, Amazon, etc." /></label>
+        <label><span>URL de la mesa</span><input type="text" class="registry-url" placeholder="https://..." /></label>
+      </div>
+    </template>
 
     <template id="event-template">
       <div class="event-block">
@@ -515,6 +528,22 @@
       addEvent({ name: 'Ceremonia' });
       addEvent({ name: 'Recepción' });
 
+      const registriesContainer = document.getElementById('registries-container');
+      const registryTemplate = document.getElementById('registry-template');
+
+      function addRegistry(defaults = {}) {
+        const clone = registryTemplate.content.cloneNode(true);
+        const block = clone.querySelector('.event-block');
+        if (defaults.label) block.querySelector('.registry-label').value = defaults.label;
+        if (defaults.url) block.querySelector('.registry-url').value = defaults.url;
+        block.querySelector('.remove-event').addEventListener('click', () => block.remove());
+        registriesContainer.appendChild(clone);
+        makeAllClearable(block);
+      }
+
+      document.getElementById('add-registry').addEventListener('click', () => addRegistry());
+      addRegistry();
+
       const itineraryContainer = document.getElementById('itinerary-container');
       const itineraryTemplate = document.getElementById('itinerary-template');
 
@@ -653,6 +682,13 @@
           }))
           .filter((item) => item.time || item.title);
 
+        const registries = Array.from(document.querySelectorAll('#registries-container .event-block'))
+          .map((block) => ({
+            label: block.querySelector('.registry-label').value.trim(),
+            url: block.querySelector('.registry-url').value.trim(),
+          }))
+          .filter((registry) => registry.label || registry.url);
+
         const name1 = fd.get('name1').trim();
         const name2 = fd.get('name2').trim();
 
@@ -672,7 +708,7 @@
           rsvpDeadline: fd.get('rsvpDeadline'),
           gallery: [],
           giftOptions: {
-            registryUrl: fd.get('registryUrl').trim(),
+            registries,
             bankInfo: fd.get('bankInfo').trim(),
           },
         };
