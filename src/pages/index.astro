@@ -5,6 +5,7 @@ import Hero from '../components/Hero.astro';
 import OurStory from '../components/OurStory.astro';
 import Gallery from '../components/Gallery.astro';
 import LocationSection from '../components/LocationSection.astro';
+import RSVP from '../components/RSVP.astro';
 import GiftRegistry from '../components/GiftRegistry.astro';
 import config from '../data/config.json';
 ---
@@ -21,6 +22,8 @@ import config from '../data/config.json';
   <Gallery images={config.gallery} />
 
   <LocationSection events={config.events} />
+
+  <RSVP deadline={config.rsvpDeadline} />
 
   <GiftRegistry
     registryUrl={config.giftOptions.registryUrl}

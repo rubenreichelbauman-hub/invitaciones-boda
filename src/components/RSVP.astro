@@ -1,0 +1,218 @@
+---
+// src/components/RSVP.astro
+interface Props {
+  deadline?: string; // ej. "2026-10-01"
+}
+const { deadline } = Astro.props;
+
+const deadlineLabel = deadline
+  ? new Date(`${deadline}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+  : null;
+---
+
+<section class="rsvp-section">
+  <p class="section-eyebrow">Confirma tu asistencia</p>
+  {deadlineLabel && <p class="rsvp-deadline">Antes del {deadlineLabel}</p>}
+
+  <form id="rsvp-form" class="rsvp-form">
+    <label class="field">
+      <span>Nombre completo</span>
+      <input type="text" name="name" required autocomplete="name" />
+    </label>
+
+    <fieldset class="field attending-field">
+      <span>¿Asistirás?</span>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="attending" value="yes" required />
+          <span>Sí, ahí estaré</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="attending" value="no" required />
+          <span>No podré ir</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <label class="field" id="guests-field">
+      <span>Número de invitados (incluyéndote)</span>
+      <input type="number" name="guests" min="1" max="10" value="1" />
+    </label>
+
+    <label class="field">
+      <span>Mensaje (opcional)</span>
+      <textarea name="message" rows="3"></textarea>
+    </label>
+
+    <button type="submit" class="submit-btn">Confirmar</button>
+  </form>
+
+  <div id="rsvp-confirmation" class="rsvp-confirmation" hidden>
+    <p id="rsvp-confirmation-text"></p>
+    <button type="button" id="rsvp-edit-btn" class="edit-btn">Editar respuesta</button>
+  </div>
+</section>
+
+<style>
+  .rsvp-section {
+    padding: 6rem 1.5rem;
+    background: var(--paper, #F1ECE4);
+    color: var(--ink, #2B2320);
+    text-align: center;
+  }
+  .section-eyebrow {
+    font-family: var(--font-utility, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-bottom: 0.5rem;
+  }
+  .rsvp-deadline {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+  }
+  .rsvp-form {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+  }
+  .attending-field {
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+  .radio-group {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.25rem;
+  }
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: normal;
+    cursor: pointer;
+  }
+  input[type='text'],
+  input[type='number'],
+  textarea {
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.95rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid rgba(43, 35, 32, 0.25);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    color: inherit;
+  }
+  textarea { resize: vertical; }
+  .submit-btn {
+    font-family: var(--font-utility, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+    background: var(--ink, #2B2320);
+    color: var(--paper, #F1ECE4);
+    border: none;
+    border-radius: 6px;
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  .submit-btn:hover { opacity: 0.85; }
+
+  .rsvp-confirmation {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .rsvp-confirmation p {
+    font-family: var(--font-heading, serif);
+    font-size: 1.2rem;
+    margin-bottom: 1.25rem;
+  }
+  .edit-btn {
+    font-size: 0.85rem;
+    background: none;
+    border: 1px solid rgba(43, 35, 32, 0.3);
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: inherit;
+  }
+  .edit-btn:hover { background: rgba(43, 35, 32, 0.05); }
+</style>
+
+<script>
+  const STORAGE_KEY = 'rsvp-submission';
+
+  function initRSVP() {
+    const form = document.getElementById('rsvp-form');
+    const confirmation = document.getElementById('rsvp-confirmation');
+    const confirmationText = document.getElementById('rsvp-confirmation-text');
+    const editBtn = document.getElementById('rsvp-edit-btn');
+    const guestsField = document.getElementById('guests-field');
+    if (!form || !confirmation || !confirmationText || !editBtn || !guestsField) return;
+
+    function updateGuestsVisibility() {
+      const attending = form.querySelector('input[name="attending"]:checked');
+      guestsField.hidden = attending?.value !== 'yes';
+    }
+    form.querySelectorAll('input[name="attending"]').forEach((input) => {
+      input.addEventListener('change', updateGuestsVisibility);
+    });
+
+    function showConfirmation(data) {
+      form.hidden = true;
+      confirmation.hidden = false;
+      confirmationText.textContent =
+        data.attending === 'yes'
+          ? `¡Gracias, ${data.name}! Confirmamos tu asistencia (${data.guests} ${Number(data.guests) === 1 ? 'invitado' : 'invitados'}).`
+          : `Gracias por avisarnos, ${data.name}. ¡Te extrañaremos!`;
+    }
+
+    function loadSaved() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        showConfirmation(data);
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get('name'),
+        attending: formData.get('attending'),
+        guests: formData.get('attending') === 'yes' ? formData.get('guests') : 0,
+        message: formData.get('message'),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showConfirmation(data);
+    });
+
+    editBtn.addEventListener('click', () => {
+      confirmation.hidden = true;
+      form.hidden = false;
+    });
+
+    updateGuestsVisibility();
+    loadSaved();
+  }
+
+  initRSVP();
+  document.addEventListener('astro:page-load', initRSVP);
+</script>
