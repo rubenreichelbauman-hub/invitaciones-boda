@@ -141,6 +141,12 @@
         </fieldset>
 
         <fieldset>
+          <legend>Itinerario</legend>
+          <div id="itinerary-container"></div>
+          <button type="button" id="add-itinerary-item" class="add-btn">+ Agregar momento</button>
+        </fieldset>
+
+        <fieldset>
           <legend>Detalles</legend>
           <label><span>Código de vestimenta</span><input type="text" name="dressCode" placeholder="Formal · tonos tierra" /></label>
           <label><span>Fecha límite para RSVP</span><input type="date" name="rsvpDeadline" /></label>
@@ -199,6 +205,17 @@
       </div>
     </template>
 
+    <template id="itinerary-template">
+      <div class="event-block itinerary-block">
+        <button type="button" class="remove-event" aria-label="Quitar momento">&times;</button>
+        <div class="row">
+          <label><span>Hora</span><input type="text" class="it-time" placeholder="20:00" /></label>
+          <label><span>Momento</span><input type="text" class="it-title" placeholder="Cena" /></label>
+        </div>
+        <label><span>Descripción (opcional)</span><input type="text" class="it-description" /></label>
+      </div>
+    </template>
+
     <script>
       const eventsContainer = document.getElementById('events-container');
       const eventTemplate = document.getElementById('event-template');
@@ -216,12 +233,29 @@
       addEvent({ name: 'Ceremonia' });
       addEvent({ name: 'Recepción' });
 
+      const itineraryContainer = document.getElementById('itinerary-container');
+      const itineraryTemplate = document.getElementById('itinerary-template');
+
+      function addItineraryItem(defaults = {}) {
+        const clone = itineraryTemplate.content.cloneNode(true);
+        const block = clone.querySelector('.itinerary-block');
+        if (defaults.time) block.querySelector('.it-time').value = defaults.time;
+        if (defaults.title) block.querySelector('.it-title').value = defaults.title;
+        block.querySelector('.remove-event').addEventListener('click', () => block.remove());
+        itineraryContainer.appendChild(clone);
+      }
+
+      document.getElementById('add-itinerary-item').addEventListener('click', () => addItineraryItem());
+      addItineraryItem({ time: '17:00', title: 'Ceremonia' });
+      addItineraryItem({ time: '20:00', title: 'Cena' });
+      addItineraryItem({ time: '21:30', title: 'Baile' });
+
       document.getElementById('onboarding-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
         const fd = new FormData(form);
 
-        const events = Array.from(document.querySelectorAll('.event-block'))
+        const events = Array.from(document.querySelectorAll('#events-container .event-block'))
           .map((block) => ({
             name: block.querySelector('.ev-name').value.trim(),
             time: block.querySelector('.ev-time').value.trim(),
@@ -230,6 +264,14 @@
             mapEmbedUrl: block.querySelector('.ev-map').value.trim(),
           }))
           .filter((ev) => ev.name || ev.location);
+
+        const itinerary = Array.from(document.querySelectorAll('#itinerary-container .itinerary-block'))
+          .map((block) => ({
+            time: block.querySelector('.it-time').value.trim(),
+            title: block.querySelector('.it-title').value.trim(),
+            description: block.querySelector('.it-description').value.trim(),
+          }))
+          .filter((item) => item.time || item.title);
 
         const gallery = fd.get('gallery')
           .split('\n')
@@ -251,6 +293,7 @@
           heroImage: fd.get('heroImage').trim(),
           story: fd.get('story').trim(),
           events,
+          itinerary,
           dressCode: fd.get('dressCode').trim(),
           rsvpDeadline: fd.get('rsvpDeadline'),
           gallery,

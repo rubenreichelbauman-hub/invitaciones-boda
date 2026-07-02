@@ -28,6 +28,13 @@
       "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.0!2d-99.14!3d19.41!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1"
     }
   ],
+  "itinerary": [
+    { "time": "17:00", "title": "Ceremonia" },
+    { "time": "18:30", "title": "Cóctel de bienvenida" },
+    { "time": "20:00", "title": "Cena" },
+    { "time": "21:30", "title": "Baile" },
+    { "time": "01:00", "title": "Última llamada" }
+  ],
   "dressCode": "Formal · tonos tierra",
   "rsvpDeadline": "2026-10-01",
   "gallery": [

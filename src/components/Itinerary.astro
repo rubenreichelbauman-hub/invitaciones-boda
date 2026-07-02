@@ -1,0 +1,97 @@
+---
+// src/components/Itinerary.astro
+interface ItineraryItem {
+  time: string;        // "17:00"
+  title: string;       // "Ceremonia"
+  description?: string;
+}
+interface Props {
+  items: ItineraryItem[];
+}
+const { items } = Astro.props;
+---
+
+{items && items.length > 0 && (
+  <section class="itinerary-section">
+    <p class="section-eyebrow">Itinerario</p>
+    <ol class="timeline">
+      {items.map((item) => (
+        <li class="timeline-item">
+          <span class="timeline-time">{item.time}</span>
+          <span class="timeline-marker"></span>
+          <div class="timeline-content">
+            <h3>{item.title}</h3>
+            {item.description && <p>{item.description}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+)}
+
+<style>
+  .itinerary-section {
+    padding: 6rem 1.5rem;
+    background: var(--paper, #F1ECE4);
+    color: var(--ink, #2B2320);
+    text-align: center;
+  }
+  .section-eyebrow {
+    font-family: var(--font-utility, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-bottom: 2.5rem;
+  }
+  .timeline {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 480px;
+    text-align: left;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 4.5rem 1.5rem 1fr;
+    align-items: start;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    top: 1.4rem;
+    bottom: -1.4rem;
+    left: calc(4.5rem + 0.7rem);
+    width: 1px;
+    background: rgba(43, 35, 32, 0.15);
+  }
+  .timeline-item:last-child::before { display: none; }
+  .timeline-time {
+    font-family: var(--font-utility, monospace);
+    font-size: 0.8rem;
+    opacity: 0.7;
+    padding-top: 0.2rem;
+  }
+  .timeline-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent, #9C7A4A);
+    margin-top: 0.35rem;
+    justify-self: center;
+  }
+  .timeline-content {
+    padding-bottom: 2rem;
+  }
+  .timeline-content h3 {
+    font-family: var(--font-heading, serif);
+    font-size: 1.2rem;
+    margin: 0 0 0.25rem 0;
+  }
+  .timeline-content p {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin: 0;
+  }
+</style>
