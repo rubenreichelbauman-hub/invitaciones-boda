@@ -8,7 +8,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Generador de config.json — Nueva boda</title>
+    <title>Cuéntanos sobre su boda</title>
     <style>
       * { box-sizing: border-box; }
       body {
@@ -94,14 +94,56 @@
       }
       .output-actions { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
       .hint { font-size: 0.8rem; opacity: 0.65; margin-top: 1.5rem; line-height: 1.5; }
+      .field-hint { font-size: 0.8rem; opacity: 0.65; margin: 0 0 0.75rem 0; line-height: 1.4; }
+      .photos-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+      .photo-thumb {
+        position: relative;
+        border: 1px solid #ddd8d1;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .photo-thumb img {
+        width: 100%;
+        height: 90px;
+        object-fit: cover;
+        display: block;
+      }
+      .photo-thumb-remove {
+        position: absolute;
+        top: 0.3rem;
+        right: 0.3rem;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        border: none;
+        background: rgba(30, 28, 26, 0.75);
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.85rem;
+        line-height: 1;
+      }
+      .photo-thumb-cover {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        padding: 0.4rem 0.5rem;
+      }
+      .photo-thumb-cover input { width: auto; }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <h1>Generador de config.json</h1>
+      <h1>Cuéntanos sobre su boda</h1>
       <p class="subtitle">
-        Llena los datos de la nueva boda y al final genera el archivo listo para
-        reemplazar <code>src/data/config.json</code>.
+        Completen esta información entre los dos. Al final se genera un archivo
+        que usaremos para armar su invitación digital.
       </p>
 
       <form id="onboarding-form">
@@ -127,10 +169,6 @@
         <fieldset>
           <legend>Fecha y contenido</legend>
           <label><span>Fecha y hora de la boda</span><input type="datetime-local" name="date" required /></label>
-          <label>
-            <span>Ruta de la foto principal (hero)</span>
-            <input type="text" name="heroImage" placeholder="/images/nombre-pareja/1.jpg" />
-          </label>
           <label><span>Nuestra historia</span><textarea name="story" rows="3"></textarea></label>
         </fieldset>
 
@@ -153,11 +191,14 @@
         </fieldset>
 
         <fieldset>
-          <legend>Galería</legend>
-          <label>
-            <span>Rutas de fotos (una por línea)</span>
-            <textarea name="gallery" rows="4" placeholder="/images/nombre-pareja/1.jpg&#10;/images/nombre-pareja/2.jpg"></textarea>
-          </label>
+          <legend>Fotos</legend>
+          <p class="field-hint">
+            Adjunta las fotos que quieras usar. La que marques como "portada" será la foto
+            principal de la invitación.
+          </p>
+          <input type="file" id="photos-input" accept="image/*" multiple hidden />
+          <button type="button" id="attach-photos-btn" class="add-btn">Adjuntar fotos</button>
+          <div id="photos-preview" class="photos-preview"></div>
         </fieldset>
 
         <fieldset>
@@ -171,16 +212,18 @@
 
       <div id="output-section" hidden>
         <fieldset>
-          <legend>Resultado</legend>
+          <legend>¡Listo!</legend>
           <textarea id="json-output" readonly></textarea>
           <div class="output-actions">
             <button type="button" id="copy-btn" class="copy-btn">Copiar</button>
-            <button type="button" id="download-btn" class="download-btn">Descargar config.json</button>
+            <button type="button" id="download-btn" class="download-btn">Descargar datos</button>
+            <button type="button" id="download-photos-btn" class="download-btn">Descargar fotos</button>
           </div>
         </fieldset>
         <p class="hint">
-          Guarda este archivo como <code>src/data/config.json</code> (reemplazando el actual)
-          y sube las fotos correspondientes a <code>public/images/</code>.
+          Descarga los dos archivos (datos y fotos) y envíaselos a quien está armando tu
+          invitación, por correo o WhatsApp. Si el navegador pregunta si puede descargar
+          varios archivos, dile que sí.
         </p>
       </div>
     </div>
@@ -263,6 +306,72 @@
       addItineraryItem({ time: '20:00', title: 'Cena y banquete', icon: 'dinner' });
       addItineraryItem({ time: '21:30', title: 'Primer baile de los novios', icon: 'rings' });
 
+      let galleryFiles = [];
+      let heroIndex = 0;
+      let lastSlug = 'boda';
+
+      function getExt(file) {
+        return file.name.split('.').pop() || 'jpg';
+      }
+
+      const photosInput = document.getElementById('photos-input');
+      const photosPreview = document.getElementById('photos-preview');
+
+      document.getElementById('attach-photos-btn').addEventListener('click', () => photosInput.click());
+
+      photosInput.addEventListener('change', () => {
+        galleryFiles = galleryFiles.concat(Array.from(photosInput.files));
+        photosInput.value = '';
+        renderPhotosPreview();
+      });
+
+      function renderPhotosPreview() {
+        photosPreview.innerHTML = '';
+        galleryFiles.forEach((file, index) => {
+          const thumb = document.createElement('div');
+          thumb.className = 'photo-thumb';
+
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          thumb.appendChild(img);
+
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'photo-thumb-remove';
+          removeBtn.textContent = '×';
+          removeBtn.setAttribute('aria-label', 'Quitar foto');
+          removeBtn.addEventListener('click', () => {
+            galleryFiles.splice(index, 1);
+            if (heroIndex >= galleryFiles.length) heroIndex = 0;
+            renderPhotosPreview();
+          });
+          thumb.appendChild(removeBtn);
+
+          const coverLabel = document.createElement('label');
+          coverLabel.className = 'photo-thumb-cover';
+          const coverInput = document.createElement('input');
+          coverInput.type = 'radio';
+          coverInput.name = 'hero-pick';
+          coverInput.checked = index === heroIndex;
+          coverInput.addEventListener('change', () => { heroIndex = index; });
+          coverLabel.appendChild(coverInput);
+          coverLabel.appendChild(document.createTextNode('Portada'));
+          thumb.appendChild(coverLabel);
+
+          photosPreview.appendChild(thumb);
+        });
+      }
+
+      function slugify(...parts) {
+        return parts
+          .join('-')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[̀-ͯ]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      }
+
       document.getElementById('onboarding-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
@@ -286,14 +395,16 @@
           }))
           .filter((item) => item.time || item.title);
 
-        const gallery = fd.get('gallery')
-          .split('\n')
-          .map((line) => line.trim())
-          .filter(Boolean);
+        const name1 = fd.get('name1').trim();
+        const name2 = fd.get('name2').trim();
+        const slug = slugify(name1, name2) || 'boda';
+        lastSlug = slug;
+
+        const gallery = galleryFiles.map((file, index) => `/images/${slug}/${index + 1}.${getExt(file)}`);
 
         const config = {
           couple: {
-            names: [fd.get('name1').trim(), fd.get('name2').trim()],
+            names: [name1, name2],
             hashtag: fd.get('hashtag').trim(),
           },
           theme: fd.get('theme').trim(),
@@ -303,7 +414,7 @@
             accent: fd.get('accent'),
           },
           date: fd.get('date'),
-          heroImage: fd.get('heroImage').trim(),
+          heroImage: gallery[heroIndex] ?? '',
           story: fd.get('story').trim(),
           events,
           itinerary,
@@ -340,6 +451,19 @@
         a.download = 'config.json';
         a.click();
         URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('download-photos-btn').addEventListener('click', () => {
+        galleryFiles.forEach((file, index) => {
+          setTimeout(() => {
+            const url = URL.createObjectURL(file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${index + 1}.${getExt(file)}`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }, index * 300);
+        });
       });
     </script>
   </body>
