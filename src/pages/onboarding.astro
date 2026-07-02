@@ -10,28 +10,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cuéntanos sobre su boda</title>
     <style is:global>
+      :root {
+        --paper: #f6f5f3;
+        --ink: #1e1c1a;
+        --accent: #9c7a4a;
+        --accent-contrast: #ffffff;
+      }
       * { box-sizing: border-box; }
       body {
         margin: 0;
         font-family: system-ui, sans-serif;
-        background: #f6f5f3;
-        color: #1e1c1a;
+        background: var(--paper);
+        color: var(--ink);
         padding: 2.5rem 1.5rem 6rem;
+        transition: background-color 0.25s ease, color 0.25s ease;
       }
       .wrap { max-width: 720px; margin: 0 auto; }
       h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
       .subtitle { opacity: 0.7; font-size: 0.9rem; margin-bottom: 2.5rem; }
       fieldset {
-        border: 1px solid #ddd8d1;
+        border: 1px solid var(--accent);
         border-radius: 10px;
         padding: 1.25rem 1.5rem 1.5rem;
         margin-bottom: 1.75rem;
         background: #fff;
+        transition: border-color 0.25s ease;
       }
       legend {
         font-weight: 600;
         font-size: 0.95rem;
         padding: 0 0.4rem;
+        color: var(--ink);
       }
       label {
         display: block;
@@ -50,6 +59,25 @@
       textarea { resize: vertical; }
       .row { display: flex; gap: 1rem; }
       .row > label { flex: 1; }
+      .clearable-wrap { position: relative; }
+      .clearable-wrap input, .clearable-wrap textarea { padding-right: 1.9rem; }
+      .clear-input-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.35rem;
+        width: 1.3rem;
+        height: 1.3rem;
+        padding: 0;
+        border: none;
+        background: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        opacity: 0.4;
+        color: var(--ink);
+      }
+      .clear-input-btn:hover { opacity: 0.85; }
       .color-row input[type="color"] { height: 2.3rem; padding: 0.2rem; }
       .color-row { margin-top: 1rem; }
       .palette-options {
@@ -83,8 +111,8 @@
         text-align: center;
       }
       .palette-option input:checked + .palette-card {
-        border-color: #1e1c1a;
-        box-shadow: 0 0 0 1px #1e1c1a;
+        border-color: var(--ink);
+        box-shadow: 0 0 0 1px var(--ink);
       }
       .swatch-group { display: flex; }
       .swatch {
@@ -107,6 +135,7 @@
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
+        z-index: 1;
         background: none;
         border: none;
         cursor: pointer;
@@ -114,67 +143,51 @@
         font-size: 0.9rem;
       }
       .remove-event:hover { opacity: 1; }
+      .itinerary-omit {
+        font-size: 0.75rem;
+        border: 1px solid #ccc4ba;
+        border-radius: 6px;
+        padding: 0.2rem 0.55rem;
+      }
       .add-btn, .generate-btn {
         font-size: 0.85rem;
-        border: 1px solid #1e1c1a;
-        background: #1e1c1a;
-        color: #fff;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: var(--accent-contrast);
         border-radius: 6px;
         padding: 0.6rem 1.1rem;
         cursor: pointer;
+        transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
       }
       .add-btn {
         background: none;
-        color: #1e1c1a;
+        color: var(--accent);
       }
-      .add-btn:hover { background: #eee9e2; }
+      .add-btn:hover { background: var(--paper); }
       .generate-btn { display: block; width: 100%; padding: 0.9rem; font-size: 0.95rem; margin-top: 0.5rem; }
       .generate-btn:disabled { opacity: 0.6; cursor: default; }
       .error-text { color: #b3261e; font-size: 0.85rem; margin-top: 0.75rem; }
       #thanks-section { margin-top: 2.5rem; }
       #thanks-message { font-size: 1rem; line-height: 1.5; margin: 0; }
       .field-hint { font-size: 0.8rem; opacity: 0.65; margin: 0 0 0.75rem 0; line-height: 1.4; }
-      .photos-preview {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-        gap: 0.75rem;
-        margin-top: 1rem;
-      }
-      .photo-thumb {
-        position: relative;
-        border: 1px solid #ddd8d1;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #fff;
-      }
-      .photo-thumb img {
-        width: 100%;
-        height: 90px;
-        object-fit: cover;
-        display: block;
-      }
-      .photo-thumb-remove {
-        position: absolute;
-        top: 0.3rem;
-        right: 0.3rem;
-        width: 1.4rem;
-        height: 1.4rem;
-        border-radius: 50%;
-        border: none;
-        background: rgba(30, 28, 26, 0.75);
-        color: #fff;
-        cursor: pointer;
-        font-size: 0.85rem;
-        line-height: 1;
-      }
-      .photo-thumb-cover {
+      .photo-email-menu {
+        margin-top: 0.75rem;
         display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.72rem;
-        padding: 0.4rem 0.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-width: 280px;
       }
-      .photo-thumb-cover input { width: auto; }
+      .photo-email-menu a {
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        font-size: 0.85rem;
+        border: 1px solid #ccc4ba;
+        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        color: #1e1c1a;
+      }
+      .photo-email-menu a:hover { background: #eee9e2; }
     </style>
   </head>
   <body>
@@ -203,6 +216,7 @@
               <option value="elegante">Elegante clásico</option>
               <option value="bohemio">Bohemio / Boho</option>
               <option value="minimalista">Minimalista moderno</option>
+              <option value="moderno">Moderno audaz</option>
             </select>
           </label>
 
@@ -230,6 +244,10 @@
 
         <fieldset>
           <legend>Itinerario</legend>
+          <p class="field-hint">
+            Cada momento es importante, no olvides compartirlo para que tus invitados no se
+            pierdan nada del gran día.
+          </p>
           <div id="itinerary-container"></div>
           <button type="button" id="add-itinerary-item" class="add-btn">+ Agregar momento</button>
         </fieldset>
@@ -243,12 +261,14 @@
         <fieldset>
           <legend>Fotos</legend>
           <p class="field-hint">
-            Adjunta las fotos que quieras usar. La que marques como "portada" será la foto
-            principal de la invitación.
+            Mándanos tus fotos por correo indicando cuál es la portada. Así evitamos
+            retrasos por el tamaño de los archivos.
           </p>
-          <input type="file" id="photos-input" accept="image/*" multiple hidden />
-          <button type="button" id="attach-photos-btn" class="add-btn">Adjuntar fotos</button>
-          <div id="photos-preview" class="photos-preview"></div>
+          <div id="photo-email-menu" class="photo-email-menu">
+            <a id="photo-email-gmail" target="_blank" rel="noopener">Abrir en Gmail</a>
+            <a id="photo-email-outlook" target="_blank" rel="noopener">Abrir en Outlook</a>
+            <a id="photo-email-default">Abrir mi correo predeterminado</a>
+          </div>
         </fieldset>
 
         <fieldset>
@@ -293,7 +313,7 @@
 
     <template id="itinerary-template">
       <div class="event-block itinerary-block">
-        <button type="button" class="remove-event" aria-label="Quitar momento">&times;</button>
+        <button type="button" class="remove-event itinerary-omit" aria-label="Omitir este momento">Omitir</button>
         <div class="row">
           <label><span>Hora</span><input type="text" class="it-time" placeholder="20:00" /></label>
           <label>
@@ -330,6 +350,11 @@
           { key: 'min-gris', label: 'Gris piedra', ink: '#24272B', paper: '#F5F5F3', accent: '#9AA5B1' },
           { key: 'min-sage', label: 'Verde sage', ink: '#222420', paper: '#F6F5F1', accent: '#A7B49E' },
           { key: 'min-mono', label: 'Blanco y negro', ink: '#111111', paper: '#FAFAFA', accent: '#C9A876' },
+        ],
+        moderno: [
+          { key: 'moderno-rojo', label: 'Blanco y negro editorial', ink: '#000000', paper: '#FFFFFF', accent: '#E63946' },
+          { key: 'moderno-azul', label: 'Azul eléctrico', ink: '#0B0B0F', paper: '#FFFFFF', accent: '#2D6CDF' },
+          { key: 'moderno-esmeralda', label: 'Verde esmeralda', ink: '#0D0D0D', paper: '#FFFFFF', accent: '#0FA968' },
         ],
       };
 
@@ -378,6 +403,33 @@
           </span>
         `;
         paletteOptions.appendChild(customLabel);
+        applyPreviewColors(getSelectedColors());
+      }
+
+      function hexToRgb(hex) {
+        const clean = hex.replace('#', '');
+        const bigint = parseInt(clean, 16);
+        return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+      }
+
+      function relativeLuminance({ r, g, b }) {
+        const channel = (c) => {
+          const s = c / 255;
+          return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        };
+        return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+      }
+
+      function contrastTextColor(hex) {
+        return relativeLuminance(hexToRgb(hex)) > 0.5 ? '#1e1c1a' : '#ffffff';
+      }
+
+      function applyPreviewColors(colors) {
+        const root = document.documentElement.style;
+        root.setProperty('--paper', colors.paper);
+        root.setProperty('--ink', colors.ink);
+        root.setProperty('--accent', colors.accent);
+        root.setProperty('--accent-contrast', contrastTextColor(colors.accent));
       }
 
       themeSelect.addEventListener('change', () => renderPalettesForTheme(themeSelect.value));
@@ -394,7 +446,12 @@
           customColors.hidden = true;
           lastPalette = currentPalettes.find((p) => p.key === value);
         }
+        applyPreviewColors(getSelectedColors());
       });
+
+      [customInk, customPaper, customAccent].forEach((input) =>
+        input.addEventListener('input', () => applyPreviewColors(getSelectedColors()))
+      );
 
       function getSelectedColors() {
         const selected = document.querySelector('input[name="palette"]:checked').value;
@@ -403,6 +460,42 @@
         }
         const palette = currentPalettes.find((p) => p.key === selected);
         return { ink: palette.ink, paper: palette.paper, accent: palette.accent };
+      }
+
+      function makeClearable(el) {
+        if (el.closest('.clearable-wrap')) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'clearable-wrap';
+        el.parentNode.insertBefore(wrap, el);
+        wrap.appendChild(el);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'clear-input-btn';
+        btn.textContent = '×';
+        btn.setAttribute('aria-label', 'Borrar contenido');
+        btn.hidden = !el.value;
+        wrap.appendChild(btn);
+
+        el.addEventListener('input', () => { btn.hidden = !el.value; });
+        btn.addEventListener('click', () => {
+          el.value = '';
+          btn.hidden = true;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          el.focus();
+        });
+      }
+
+      function makeAllClearable(root) {
+        root.querySelectorAll('input[type="text"], textarea').forEach(makeClearable);
+      }
+
+      function refreshClearButton(el) {
+        const btn = el.nextElementSibling;
+        if (btn && btn.classList.contains('clear-input-btn')) {
+          btn.hidden = !el.value;
+        }
       }
 
       const eventsContainer = document.getElementById('events-container');
@@ -415,6 +508,7 @@
         if (defaults.time) block.querySelector('.ev-time').value = defaults.time;
         block.querySelector('.remove-event').addEventListener('click', () => block.remove());
         eventsContainer.appendChild(clone);
+        makeAllClearable(block);
       }
 
       document.getElementById('add-event').addEventListener('click', () => addEvent());
@@ -432,79 +526,109 @@
         if (defaults.icon) block.querySelector('.it-icon').value = defaults.icon;
         block.querySelector('.remove-event').addEventListener('click', () => block.remove());
         itineraryContainer.appendChild(clone);
+        makeAllClearable(block);
       }
 
-      document.getElementById('add-itinerary-item').addEventListener('click', () => addItineraryItem());
-      addItineraryItem({ time: '17:00', title: 'Inicia la ceremonia civil', icon: 'church' });
-      addItineraryItem({ time: '20:00', title: 'Cena y banquete', icon: 'dinner' });
-      addItineraryItem({ time: '21:30', title: 'Primer baile de los novios', icon: 'rings' });
-
-      const WEB3FORMS_ACCESS_KEY = '8cb79531-2f65-40a0-8acb-95268fcfdf52';
-
-      let galleryFiles = [];
-      let heroIndex = 0;
-
-      function getExt(file) {
-        return file.name.split('.').pop() || 'jpg';
+      function timeToMinutes(value) {
+        const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+        if (!match) return null;
+        const hours = Number(match[1]);
+        const minutes = Number(match[2]);
+        if (hours > 23 || minutes > 59) return null;
+        return hours * 60 + minutes;
       }
 
-      const photosInput = document.getElementById('photos-input');
-      const photosPreview = document.getElementById('photos-preview');
+      function sortItineraryByTime() {
+        const blocks = Array.from(itineraryContainer.querySelectorAll('.itinerary-block'));
+        const ordered = blocks
+          .map((block) => ({
+            block,
+            minutes: timeToMinutes(block.querySelector('.it-time').value) ?? Infinity,
+          }))
+          .sort((a, b) => a.minutes - b.minutes);
+        ordered.forEach(({ block }) => itineraryContainer.appendChild(block));
+      }
 
-      document.getElementById('attach-photos-btn').addEventListener('click', () => photosInput.click());
-
-      photosInput.addEventListener('change', () => {
-        galleryFiles = galleryFiles.concat(Array.from(photosInput.files));
-        photosInput.value = '';
-        renderPhotosPreview();
+      itineraryContainer.addEventListener('change', (e) => {
+        if (e.target.classList.contains('it-time')) sortItineraryByTime();
       });
 
-      function renderPhotosPreview() {
-        photosPreview.innerHTML = '';
-        galleryFiles.forEach((file, index) => {
-          const thumb = document.createElement('div');
-          thumb.className = 'photo-thumb';
+      document.getElementById('add-itinerary-item').addEventListener('click', () => addItineraryItem());
+      const DEFAULT_ITINERARY = [
+        { time: '13:00', title: 'Ceremonia Civil', icon: 'church' },
+        { time: '17:00', title: 'Ceremonia Religiosa', icon: 'church' },
+        { time: '18:00', title: 'Sesión de fotos', icon: 'camera' },
+        { time: '19:00', title: 'Recepción', icon: 'toast' },
+        { time: '19:30', title: 'Cóctel de bienvenida', icon: 'toast' },
+        { time: '20:00', title: 'Primer baile de los novios', icon: 'rings' },
+        { time: '20:30', title: 'Cena', icon: 'dinner' },
+        { time: '21:30', title: 'Fiesta', icon: 'party' },
+        { time: '23:30', title: 'Fin del gran día', icon: 'heart' },
+      ];
+      DEFAULT_ITINERARY.forEach((item) => addItineraryItem(item));
 
-          const img = document.createElement('img');
-          img.src = URL.createObjectURL(file);
-          thumb.appendChild(img);
+      makeAllClearable(document);
 
-          const removeBtn = document.createElement('button');
-          removeBtn.type = 'button';
-          removeBtn.className = 'photo-thumb-remove';
-          removeBtn.textContent = '×';
-          removeBtn.setAttribute('aria-label', 'Quitar foto');
-          removeBtn.addEventListener('click', () => {
-            galleryFiles.splice(index, 1);
-            if (heroIndex >= galleryFiles.length) heroIndex = 0;
-            renderPhotosPreview();
-          });
-          thumb.appendChild(removeBtn);
+      const name1Input = document.querySelector('input[name="name1"]');
+      const name2Input = document.querySelector('input[name="name2"]');
+      const dateInput = document.querySelector('input[name="date"]');
+      const hashtagInput = document.querySelector('input[name="hashtag"]');
 
-          const coverLabel = document.createElement('label');
-          coverLabel.className = 'photo-thumb-cover';
-          const coverInput = document.createElement('input');
-          coverInput.type = 'radio';
-          coverInput.name = 'hero-pick';
-          coverInput.checked = index === heroIndex;
-          coverInput.addEventListener('change', () => { heroIndex = index; });
-          coverLabel.appendChild(coverInput);
-          coverLabel.appendChild(document.createTextNode('Portada'));
-          thumb.appendChild(coverLabel);
+      let hashtagAuto = true;
 
-          photosPreview.appendChild(thumb);
-        });
-      }
-
-      function slugify(...parts) {
-        return parts
-          .join('-')
-          .toLowerCase()
+      function cleanNameForHashtag(name) {
+        return name
           .normalize('NFD')
           .replace(/[̀-ͯ]/g, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
+          .replace(/[^a-zA-Z]/g, '');
       }
+
+      function generateHashtag() {
+        const n1 = cleanNameForHashtag(name1Input.value.trim());
+        const n2 = cleanNameForHashtag(name2Input.value.trim());
+        if (!n1 || !n2) return '';
+        const year = dateInput.value ? new Date(dateInput.value).getFullYear() : new Date().getFullYear();
+        return `#${n1}Y${n2}${year}`;
+      }
+
+      function updateHashtagIfAuto() {
+        if (!hashtagAuto) return;
+        hashtagInput.value = generateHashtag();
+        refreshClearButton(hashtagInput);
+      }
+
+      [name1Input, name2Input, dateInput].forEach((input) =>
+        input.addEventListener('input', updateHashtagIfAuto)
+      );
+
+      hashtagInput.addEventListener('input', () => {
+        hashtagAuto = false;
+      });
+
+      const WEB3FORMS_ACCESS_KEY = '8cb79531-2f65-40a0-8acb-95268fcfdf52';
+      const PHOTOS_EMAIL = 'rubenreichelbauman@gmail.com';
+
+      function updatePhotoEmailLinks() {
+        const name1 = name1Input.value.trim();
+        const name2 = name2Input.value.trim();
+        const names = name1 && name2 ? `${name1} y ${name2}` : 'nuestra invitación';
+
+        const subject = `Fotos para la boda de ${names}`;
+        const body =
+          `Hola, aquí les mando las fotos para nuestra invitación.\n\n` +
+          `La foto de portada es: [escribe aquí el nombre del archivo]\n\n` +
+          `¡Gracias!`;
+
+        document.getElementById('photo-email-gmail').href =
+          `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(PHOTOS_EMAIL)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        document.getElementById('photo-email-outlook').href =
+          `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(PHOTOS_EMAIL)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        document.getElementById('photo-email-default').href =
+          `mailto:${PHOTOS_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      }
+
+      [name1Input, name2Input].forEach((input) => input.addEventListener('input', updatePhotoEmailLinks));
+      updatePhotoEmailLinks();
 
       document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -531,9 +655,6 @@
 
         const name1 = fd.get('name1').trim();
         const name2 = fd.get('name2').trim();
-        const slug = slugify(name1, name2) || 'boda';
-
-        const gallery = galleryFiles.map((file, index) => `/images/${slug}/${index + 1}.${getExt(file)}`);
 
         const config = {
           couple: {
@@ -543,13 +664,13 @@
           theme: fd.get('theme').trim(),
           colors: getSelectedColors(),
           date: fd.get('date'),
-          heroImage: gallery[heroIndex] ?? '',
+          heroImage: '',
           story: fd.get('story').trim(),
           events,
           itinerary,
           dressCode: fd.get('dressCode').trim(),
           rsvpDeadline: fd.get('rsvpDeadline'),
-          gallery,
+          gallery: [],
           giftOptions: {
             registryUrl: fd.get('registryUrl').trim(),
             bankInfo: fd.get('bankInfo').trim(),
@@ -567,9 +688,6 @@
         payload.append('subject', `Nueva boda: ${name1} & ${name2}`);
         payload.append('from_name', `${name1} & ${name2}`);
         payload.append('config_json', JSON.stringify(config, null, 2));
-        galleryFiles.forEach((file, index) => {
-          payload.append(`file_${index}`, file, `${index + 1}.${getExt(file)}`);
-        });
 
         try {
           const response = await fetch('https://api.web3forms.com/submit', {
@@ -581,7 +699,7 @@
 
           form.hidden = true;
           document.getElementById('thanks-message').textContent =
-            `¡Gracias, ${name1} y ${name2}! Ya recibimos su información y sus fotos. Pronto nos pondremos en contacto.`;
+            `¡Gracias, ${name1} y ${name2}! Ya recibimos su información. No olviden mandarnos sus fotos por correo. Pronto nos pondremos en contacto.`;
           document.getElementById('thanks-section').hidden = false;
           document.getElementById('thanks-section').scrollIntoView({ behavior: 'smooth' });
         } catch (err) {
