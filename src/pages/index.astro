@@ -1,0 +1,26 @@
+---
+// src/pages/index.astro
+import WeddingLayout from '../layouts/WeddingLayout.astro';
+import Hero from '../components/Hero.astro';
+import Gallery from '../components/Gallery.astro';
+import LocationSection from '../components/LocationSection.astro';
+import GiftRegistry from '../components/GiftRegistry.astro';
+import config from '../data/config.json';
+---
+
+<WeddingLayout title={`${config.couple.names[0]} & ${config.couple.names[1]}`}>
+  <Hero
+    names={config.couple.names}
+    date={config.date}
+    heroImage={config.heroImage}
+  />
+
+  <Gallery images={config.gallery} />
+
+  <LocationSection events={config.events} />
+
+  <GiftRegistry
+    registryUrl={config.giftOptions.registryUrl}
+    bankInfo={config.giftOptions.bankInfo}
+  />
+</WeddingLayout>

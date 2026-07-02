@@ -1,0 +1,42 @@
+{
+  "couple": {
+    "names": ["Ana", "Carlos"],
+    "hashtag": "#AnaYCarlos2026"
+  },
+  "theme": "elegante",
+  "colors": {
+    "ink": "#2B2320",
+    "paper": "#F1ECE4",
+    "accent": "#9C7A4A"
+  },
+  "date": "2026-11-14T17:00:00",
+  "heroImage": "/images/ana-carlos/1.jpg",
+  "story": "Nos conocimos en una cafetería en 2019 y desde entonces no nos hemos separado.",
+  "events": [
+    {
+      "name": "Ceremonia",
+      "time": "17:00",
+      "location": "Iglesia San José",
+      "address": "Av. Reforma 123, Ciudad de México",
+      "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.0!2d-99.16!3d19.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1"
+    },
+    {
+      "name": "Recepción",
+      "time": "19:00",
+      "location": "Salón Los Pinos",
+      "address": "Calle Los Pinos 456, Ciudad de México",
+      "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.0!2d-99.14!3d19.41!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1"
+    }
+  ],
+  "dressCode": "Formal · tonos tierra",
+  "rsvpDeadline": "2026-10-01",
+  "gallery": [
+    "/images/ana-carlos/1.jpg",
+    "/images/ana-carlos/2.jpg",
+    "/images/ana-carlos/3.jpg"
+  ],
+  "giftOptions": {
+    "registryUrl": "https://www.mesaderegalos.com/ana-carlos",
+    "bankInfo": "Banco: BBVA\nCuenta: 0123456789\nA nombre de: Ana Pérez"
+  }
+}

@@ -1,0 +1,120 @@
+---
+// src/components/LocationSection.astro
+interface EventInfo {
+  name: string;          // "Ceremonia" | "Recepción"
+  time: string;          // "17:00"
+  location: string;      // "Iglesia San José"
+  address?: string;      // dirección completa para mostrar
+  mapEmbedUrl?: string;  // URL de embed de Google Maps
+}
+interface Props {
+  events: EventInfo[];
+}
+const { events } = Astro.props;
+---
+
+<section class="location-section">
+  <p class="section-eyebrow">¿Dónde y cuándo?</p>
+  <div class="location-grid">
+    {events.map((event) => (
+      <div class="location-card">
+        <h3>{event.name}</h3>
+        <p class="location-time">{event.time} hrs</p>
+        <p class="location-place">{event.location}</p>
+        {event.address && <p class="location-address">{event.address}</p>}
+
+        {event.mapEmbedUrl && (
+          <div class="map-wrapper">
+            <iframe
+              src={event.mapEmbedUrl}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+          </div>
+        )}
+
+        {event.address && (
+          <a
+            class="map-link"
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Cómo llegar →
+          </a>
+        )}
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .location-section {
+    padding: 6rem 1.5rem;
+    background: var(--ink, #2B2320);
+    color: var(--paper, #F1ECE4);
+    text-align: center;
+  }
+  .section-eyebrow {
+    font-family: var(--font-utility, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-bottom: 2.5rem;
+  }
+  .location-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .location-card {
+    background: rgba(241, 236, 228, 0.06);
+    border: 1px solid rgba(241, 236, 228, 0.15);
+    border-radius: 10px;
+    padding: 2rem 1.5rem;
+    text-align: left;
+  }
+  .location-card h3 {
+    font-family: var(--font-heading, serif);
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+  }
+  .location-time {
+    font-family: var(--font-utility, monospace);
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin: 0 0 0.75rem 0;
+  }
+  .location-place {
+    font-weight: 500;
+    margin: 0;
+  }
+  .location-address {
+    font-size: 0.85rem;
+    opacity: 0.65;
+    margin: 0.25rem 0 1rem 0;
+  }
+  .map-wrapper {
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 1rem 0;
+    aspect-ratio: 16 / 10;
+  }
+  .map-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .map-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--accent, #C9A876);
+    text-decoration: none;
+    margin-top: 0.5rem;
+  }
+  .map-link:hover { text-decoration: underline; }
+</style>
