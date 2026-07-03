@@ -1,20 +1,16 @@
 ---
 // src/components/LocationSection.astro
 interface EventInfo {
-  name: string;          // "Ceremonia" | "Recepción"
-  time: string;          // "17:00"
-  location: string;      // "Iglesia San José"
-  address?: string;      // dirección completa para mostrar
-  mapEmbedUrl?: string;  // URL de embed de Google Maps
+  name: string;      // "Ceremonia" | "Recepción"
+  time: string;      // "17:00"
+  location: string;  // "Iglesia San José"
+  address?: string;  // dirección completa para mostrar
+  mapUrl?: string;    // URL de Google Maps del lugar (la que se obtiene al buscarlo, botón Compartir)
 }
 interface Props {
   events: EventInfo[];
 }
 const { events } = Astro.props;
-
-// Solo un link de "insertar mapa" (google.com/maps/embed?...) funciona dentro de un iframe;
-// los links para compartir (maps.app.goo.gl/...) son bloqueados por Google y salen en blanco.
-const isEmbeddable = (url?: string) => !!url && url.includes('maps/embed');
 ---
 
 <section class="location-section">
@@ -27,21 +23,10 @@ const isEmbeddable = (url?: string) => !!url && url.includes('maps/embed');
         <p class="location-place">{event.location}</p>
         {event.address && <p class="location-address">{event.address}</p>}
 
-        {isEmbeddable(event.mapEmbedUrl) && (
-          <div class="map-wrapper">
-            <iframe
-              src={event.mapEmbedUrl}
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              allowfullscreen
-            ></iframe>
-          </div>
-        )}
-
-        {event.address && (
+        {(event.mapUrl || event.address) && (
           <a
             class="map-link"
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}`}
+            href={event.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address || '')}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -101,17 +86,6 @@ const isEmbeddable = (url?: string) => !!url && url.includes('maps/embed');
     font-size: 0.85rem;
     opacity: 0.65;
     margin: 0.25rem 0 1rem 0;
-  }
-  .map-wrapper {
-    border-radius: 6px;
-    overflow: hidden;
-    margin: 1rem 0;
-    aspect-ratio: 16 / 10;
-  }
-  .map-wrapper iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
   }
   .map-link {
     display: inline-block;

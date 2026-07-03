@@ -331,16 +331,15 @@
         <button type="button" class="remove-event" aria-label="Quitar evento">&times;</button>
         <label><span>Nombre del evento</span><input type="text" class="ev-name" placeholder="Ceremonia" /></label>
         <div class="row">
-          <label><span>Hora</span><input type="text" class="ev-time" placeholder="17:00" /></label>
+          <label><span>Hora</span><input type="time" class="ev-time" /></label>
           <label><span>Lugar</span><input type="text" class="ev-location" placeholder="Iglesia San José" /></label>
         </div>
         <label><span>Dirección completa</span><input type="text" class="ev-address" /></label>
         <label>
-          <span>URL de embed de Google Maps (opcional)</span>
-          <input type="text" class="ev-map" placeholder="https://www.google.com/maps/embed?pb=..." />
+          <span>Link de Google Maps (opcional)</span>
+          <input type="text" class="ev-map" placeholder="https://maps.app.goo.gl/..." />
           <small style="display:block;opacity:0.6;margin-top:0.3rem;">
-            Debe ser el link de "Insertar un mapa" (botón Compartir → pestaña Insertar un mapa → Copiar HTML,
-            usa solo la URL del src). El link normal para compartir (maps.app.goo.gl/...) no funciona aquí.
+            Busca el lugar en Google Maps, dale a "Compartir" y pega aquí el link.
           </small>
         </label>
       </div>
@@ -350,7 +349,7 @@
       <div class="event-block itinerary-block">
         <button type="button" class="remove-event itinerary-omit" aria-label="Omitir este momento">Omitir</button>
         <div class="row">
-          <label><span>Hora</span><input type="text" class="it-time" placeholder="20:00" /></label>
+          <label><span>Hora</span><input type="time" class="it-time" /></label>
           <label>
             <span>Icono</span>
             <select class="it-icon">
@@ -546,7 +545,7 @@
         if (defaults.time) block.querySelector('.ev-time').value = defaults.time;
         if (defaults.location) block.querySelector('.ev-location').value = defaults.location;
         if (defaults.address) block.querySelector('.ev-address').value = defaults.address;
-        if (defaults.mapEmbedUrl) block.querySelector('.ev-map').value = defaults.mapEmbedUrl;
+        if (defaults.mapUrl) block.querySelector('.ev-map').value = defaults.mapUrl;
         block.querySelector('.remove-event').addEventListener('click', () => {
           block.remove();
           saveDraft();
@@ -705,7 +704,7 @@
           time: block.querySelector('.ev-time').value,
           location: block.querySelector('.ev-location').value,
           address: block.querySelector('.ev-address').value,
-          mapEmbedUrl: block.querySelector('.ev-map').value,
+          mapUrl: block.querySelector('.ev-map').value,
         }));
       }
 
@@ -840,7 +839,7 @@
             time: block.querySelector('.ev-time').value.trim(),
             location: block.querySelector('.ev-location').value.trim(),
             address: block.querySelector('.ev-address').value.trim(),
-            mapEmbedUrl: block.querySelector('.ev-map').value.trim(),
+            mapUrl: block.querySelector('.ev-map').value.trim(),
           }))
           .filter((ev) => ev.name || ev.location);
 
