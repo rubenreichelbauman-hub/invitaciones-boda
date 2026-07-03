@@ -14,7 +14,7 @@ src/
 │   ├── index.astro       ensambla el sitio real, lee config.json
 │   └── onboarding.astro  formulario interno para que la pareja genere su config.json
 └── data/
-    └── config.json       toda la info editable de la boda (demo/ejemplo actual)
+    └── config.json       toda la info editable de la boda (primer test real: Zaira & Ruben)
 ```
 
 ## `/onboarding`
@@ -40,9 +40,13 @@ Herramienta para que la pareja cuente los detalles de su boda sin ver nada técn
 
 **`giftOptions` es un arreglo, no una URL.** `config.json` usa `giftOptions.registries: [{label, url}]` para soportar múltiples mesas de regalo (tienda departamental + en línea, etc.), no un solo `registryUrl`. Si se toca `GiftRegistry.astro` o `index.astro`, respetar ese shape.
 
+**Links de mapa simples, no embeds.** Los eventos usan `mapUrl` (no `mapEmbedUrl`) — es el link normal que da el botón "Compartir" de Google Maps al buscar un lugar, usado como href de un botón "Cómo llegar" (`LocationSection.astro`), no como `src` de un iframe. Ya no existe la distinción "link para compartir vs. link para insertar mapa" que había antes; se abandonó el iframe embebido por completo.
+
+**Horas siempre en 24h.** Los campos de hora en Eventos e Itinerario del onboarding son `<input type="time">` (no texto libre), así el valor guardado siempre es `HH:MM` inequívoco. Antes eran texto libre y causaron un bug real (una pareja escribió "4:00"/"8:00" queriendo decir 4pm/8pm).
+
 ## Pendientes (en orden de impacto)
 
-1. **Visibilidad del RSVP** — se está evaluando dar a la pareja una plantilla de Excel para su lista de invitados y generar links personalizados por invitado (`?invitado=slug`), lo que también permitiría mandar cada RSVP por Web3Forms con el nombre del invitado. Sin decidir aún si esta herramienta vive dentro de `/onboarding` o aparte (ej. `/invitados`).
+1. **Visibilidad del RSVP** — bajo evaluación un giro más grande: convertir el proyecto en una pequeña plataforma con login por cliente y un dashboard (onboarding, lista de invitados con link personalizado por invitado + botón de copiar para compartir manualmente, organización de mesas, posible agenda/checklist a futuro). Esto requeriría traer de vuelta Supabase (auth + DB) y resolvería de paso el pendiente de multi-tenant de abajo. El usuario está evaluando el modelo de negocio antes de meterle ingeniería — no asumir alcance ni empezar a programarlo sin confirmar primero.
 2. **Sin hosting/deploy configurado** — solo GitHub + local. Bloqueante para compartir una invitación real.
 3. **Sin multi-tenant** — cada boda nueva requiere reemplazar `config.json` y fotos a mano en `public/images/`.
 4. `onboarding.astro` podría dividirse en módulos si se le sigue agregando funcionalidad (no urgente).
